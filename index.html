@@ -1,0 +1,63 @@
+<!doctype html>
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>D3 Tests</title>
+		<meta name="description" content="D3 tests">
+		<meta name="author" content="Xavier Lambein">
+
+		<!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+
+		<style>
+.chart {
+	float: left;
+}
+
+.chart rect {
+	fill: steelblue;
+}
+
+.chart text {
+}
+
+.chart .axis text {
+	display: none;
+}
+
+.matrix {
+	padding: 2px;
+	border: 1px outset black;
+}
+
+.matrix input {
+	border: 1px inset black;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	margin: 2px;
+	text-align: center;
+	font-weight: bold;
+}
+		</style>
+
+		<!--[if lt IE 9]>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<svg class="chart"></svg>
+
+		<table class="matrix"></table>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.16.5/math.min.js"></script>
+		<script src="http://www.numericjs.com/lib/numeric-1.2.6.min.js"></script>
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+		<script src="https://cdn.jsdelivr.net/npm/pubsubJS@1.0.0/pubsub.min.js"></script>
+		<script src="script.js"></script>
+	</body>
+</html>
+
