@@ -5,43 +5,50 @@ var data = [
 	{color: 'yellow', vector: [1, -1]}
 ];
 
-var margin = {top: 10, right: 10, bottom: 10, left: 10},
-	width = 640 - margin.left - margin.right,
-	height = 480 - margin.top - margin.bottom;
+class Chart {
+	constructor (width, height, xlim = [-1, 1], ylim = [-1, 1]) {
+		this.margin = {top: 10, right: 10, bottom: 10, left: 10};
+		this.width = width - this.margin.left - this.margin.right;
+		this.height = height - this.margin.top - this.margin.bottom;
 
-var xlim = [-6., 6.],
-	ylim = [-4.5, 4.5];
+		this.xscale = d3.scaleLinear()
+				.domain(xlim)
+				.range([0, this.width]);
+		this.yscale = d3.scaleLinear()
+				.domain(ylim)
+				.range([this.height, 0]);
+	}
 
-var cx = width / 2,
-	cy = height / 2;
+	attach (selection) {
+		this.chart = selection.append("svg")
+				.attr("width", this.width + this.margin.left + this.margin.right)
+				.attr("height", this.height + this.margin.top + this.margin.bottom)
+			.append("g")
+				.attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
 
-var chart = d3.select(".chart")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-	.append("g")
-		.attr("transform", `translate(${margin.left}, ${margin.top})`);
+		var xaxis = d3.axisTop(this.xscale)
+				.tickSizeOuter(0),
+			yaxis = d3.axisRight(this.yscale)
+				.tickSizeOuter(0);
 
-var xscale = d3.scaleLinear()
-		.domain(xlim)
-		.range([0, width]),
-	yscale = d3.scaleLinear()
-		.domain(ylim)
-		.range([height, 0]);
+		this.chart.append("g")
+				.attr("class", "axis")
+				.attr("transform", `translate(0, ${this.height/2})`)
+				.call(xaxis);
 
-var xaxis = d3.axisTop(xscale)
-		.tickSizeOuter(0)
-	yaxis = d3.axisRight(yscale)
-		.tickSizeOuter(0);
+		this.chart.append("g")
+				.attr("class", "axis")
+				.attr("transform", `translate(${this.width/2}, 0)`)
+				.call(yaxis);
 
-chart.append("g")
-		.attr("class", "axis")
-		.attr("transform", `translate(0, ${cy})`)
-		.call(xaxis);
+		return this.chart;
+	}
+}
 
-chart.append("g")
-		.attr("class", "axis")
-		.attr("transform", `translate(${cx}, 0)`)
-		.call(yaxis);
+var chart = new Chart(640, 480, [-6, 6], [-4.5, 4.5]);
+
+chart.attach(d3.select("body"))
+		.attr("class", "chart");
 
 var matrixData = [[1, 0], [0, 1]];
 
@@ -56,20 +63,20 @@ function update() {
 		return d2;
 	});
 
-	var vectors = chart.selectAll(".vector")
+	var vectors = chart.chart.selectAll(".vector")
 			.data(transformedData);
 
 	vectors.enter()	
 			.append("circle")
 			.attr("class", "vector")
 			.attr("fill", d => d.color)
-			.attr("cx", d => xscale(d.vector[0]))
-			.attr("cy", d => yscale(d.vector[1]))
+			.attr("cx", d => chart.xscale(d.vector[0]))
+			.attr("cy", d => chart.yscale(d.vector[1]))
 			.attr("r", "5px");
 
 	vectors.transition()
-			.attr("cx", d => xscale(d.vector[0]))
-			.attr("cy", d => yscale(d.vector[1]));
+			.attr("cx", d => chart.xscale(d.vector[0]))
+			.attr("cy", d => chart.yscale(d.vector[1]));
 
 	vectors.exit().remove();
 }
