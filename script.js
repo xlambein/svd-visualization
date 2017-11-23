@@ -1,53 +1,39 @@
+import {Chart, Matrix} from "./chart.js";
+
 var data = [
-	{color: 'red', vector: [1, 1]},
-	{color: 'blue', vector: [-1, 1]},
-	{color: 'green', vector: [-1, -1]},
-	{color: 'yellow', vector: [1, -1]}
+	{vector: [1, 1]},
+	{vector: [1, .5]},
+	{vector: [1, 0]},
+	{vector: [1, -.5]},
+	{vector: [1, -1]},
+	{vector: [.5, 1]},
+	{vector: [0, 1]},
+	{vector: [-.5, 1]},
+	{vector: [.5, -1]},
+	{vector: [0, -1]},
+	{vector: [-.5, -1]},
+	{vector: [-1, 1]},
+	{vector: [-1, .5]},
+	{vector: [-1, 0]},
+	{vector: [-1, -.5]},
+	{vector: [-1, -1]},
 ];
 
-class Chart {
-	constructor (width, height, xlim = [-1, 1], ylim = [-1, 1]) {
-		this.margin = {top: 10, right: 10, bottom: 10, left: 10};
-		this.width = width - this.margin.left - this.margin.right;
-		this.height = height - this.margin.top - this.margin.bottom;
-
-		this.xscale = d3.scaleLinear()
-				.domain(xlim)
-				.range([0, this.width]);
-		this.yscale = d3.scaleLinear()
-				.domain(ylim)
-				.range([this.height, 0]);
-	}
-
-	attach (selection) {
-		this.chart = selection.append("svg")
-				.attr("width", this.width + this.margin.left + this.margin.right)
-				.attr("height", this.height + this.margin.top + this.margin.bottom)
-			.append("g")
-				.attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-
-		var xaxis = d3.axisTop(this.xscale)
-				.tickSizeOuter(0),
-			yaxis = d3.axisRight(this.yscale)
-				.tickSizeOuter(0);
-
-		this.chart.append("g")
-				.attr("class", "axis")
-				.attr("transform", `translate(0, ${this.height/2})`)
-				.call(xaxis);
-
-		this.chart.append("g")
-				.attr("class", "axis")
-				.attr("transform", `translate(${this.width/2}, 0)`)
-				.call(yaxis);
-
-		return this.chart;
-	}
+function colorGradient2D(x, y) {
+	return [
+		Math.round(255 * ((y + 1)/2)),
+		Math.round(255 * (1 - (y + x + 2)/4)),
+		Math.round(255 * ((x + 1)/2))
+	];
 }
 
-var chart = new Chart(640, 480, [-6, 6], [-4.5, 4.5]);
+for (let i = 0; i < data.length; i++) {
+	data[i].color = colorGradient2D(...data[i].vector);
+}
 
-chart.attach(d3.select("body"))
+var chart = new Chart(320, 240, [-6, 6], [-4.5, 4.5]);
+
+chart.attach(d3.select(".chart"))
 		.attr("class", "chart");
 
 var matrixData = [[1, 0], [0, 1]];
@@ -55,45 +41,69 @@ var matrixData = [[1, 0], [0, 1]];
 var matrix = d3.select(".matrix");
 
 function update() {
-	matrixData = matrix.selectAll("input").data();
-	var M = math.reshape(matrixData, [2, 2]);
+	matrixData = math.reshape(matrix.selectAll("input").data(), [2, 2]);
 	var transformedData = data.map((d, i) => {
 		var d2 = Object.assign({}, d);
-		d2.vector = numeric.dot(d.vector, numeric.transpose(M));
+		d2.vector = numeric.dot(d.vector, numeric.transpose(matrixData));
 		return d2;
 	});
 
 	var vectors = chart.chart.selectAll(".vector")
 			.data(transformedData);
 
-	vectors.enter()	
-			.append("circle")
+	vectors.exit().remove();
+
+	vectors.enter().append("circle")
 			.attr("class", "vector")
-			.attr("fill", d => d.color)
+			.attr("fill", d => `rgb(${d.color[0]},${d.color[1]},${d.color[2]})`)
 			.attr("cx", d => chart.xscale(d.vector[0]))
 			.attr("cy", d => chart.yscale(d.vector[1]))
-			.attr("r", "5px");
+			.attr("r", "3px");
 
 	vectors.transition()
 			.attr("cx", d => chart.xscale(d.vector[0]))
 			.attr("cy", d => chart.yscale(d.vector[1]));
-
-	vectors.exit().remove();
+	
+	var svd = numeric.svd(matrixData);
+	U.update(svd.U);
+	S.update(numeric.diag(svd.S));
+	V.update(numeric.transpose(svd.V));
 }
 
 var tr = matrix.selectAll("tr")
 		.data(matrixData)
-	.enter()
-		.append("tr");
+	.enter().append("tr");
 
 var td = tr.selectAll("td")
 		.data(d => d)
-	.enter()
-		.append("td")
+	.enter().append("td")
 		.append("input")
 		.attr("type", "text")
 		.attr("value", d => d)
 		.on("input", function () { d3.select(this).datum(Number.isNaN(+this.value) ? 0 : +this.value); update(); });
+
+var U = new Matrix()
+		.attach(d3.select("#target"));
+
+d3.select(".bracket")
+		.style("font-size", matrix.style("height"));
+
+d3.select("#target").append("span")
+		.attr("class", "operator")
+		.text("•");
+
+var S = new Matrix()
+		.attach(d3.select("#target"))
+
+d3.select("#target").append("span")
+		.attr("class", "operator")
+		.text("•");
+
+var V = new Matrix()
+		.attach(d3.select("#target"));
+
+V.table.on("mouseenter", function () { console.log(V.data); });
+V.table.on("mouseleave", function () { console.log("out"); });
 
 update();
 
