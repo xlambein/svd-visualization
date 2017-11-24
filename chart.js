@@ -1,20 +1,20 @@
 
 export class Chart {
-	constructor (width, height, xlim = [-1, 1], ylim = [-1, 1]) {
-		this.margin = {top: 10, right: 10, bottom: 10, left: 10};
-		this.width = width - this.margin.left - this.margin.right;
-		this.height = height - this.margin.top - this.margin.bottom;
+	constructor (opts) {
+		this.margin = opts.margin || {top: 10, right: 10, bottom: 10, left: 10};
+		this.width = opts.width - this.margin.left - this.margin.right;
+		this.height = opts.height - this.margin.top - this.margin.bottom;
+		this.xlim = opts.xlim || [-1, 1];
+		this.ylim = opts.ylim || [-1, 1];
 
 		this.xscale = d3.scaleLinear()
-				.domain(xlim)
+				.domain(this.xlim)
 				.range([0, this.width]);
 		this.yscale = d3.scaleLinear()
-				.domain(ylim)
+				.domain(this.ylim)
 				.range([this.height, 0]);
-	}
 
-	attach (selection) {
-		this.chart = selection.append("svg")
+		this.chart = opts.elem.append("svg")
 				.attr("width", this.width + this.margin.left + this.margin.right)
 				.attr("height", this.height + this.margin.top + this.margin.bottom)
 			.append("g")
@@ -35,7 +35,30 @@ export class Chart {
 				.attr("transform", `translate(${this.width/2}, 0)`)
 				.call(yaxis);
 
-		return this.chart;
+		this.vectors = this.chart.append("g");
+	}
+
+	draw () {
+		var vectors = this.vectors.selectAll(".vector")
+				.data(this.data);
+
+		vectors.exit().remove();
+
+		vectors.enter().append("circle")
+				.attr("class", "vector")
+				.attr("fill", d => `rgb(${d.color[0]},${d.color[1]},${d.color[2]})`)
+				.attr("cx", d => this.xscale(d.vector[0]))
+				.attr("cy", d => this.yscale(d.vector[1]))
+				.attr("r", "3px");
+
+		vectors.transition()
+				.attr("cx", d => this.xscale(d.vector[0]))
+				.attr("cy", d => this.yscale(d.vector[1]));
+	}
+
+	setData (data) {
+		this.data = data;
+		return this;
 	}
 }
 

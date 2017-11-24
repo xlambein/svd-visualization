@@ -31,47 +31,41 @@ for (let i = 0; i < data.length; i++) {
 	data[i].color = colorGradient2D(...data[i].vector);
 }
 
-var chart = new Chart(320, 240, [-6, 6], [-4.5, 4.5]);
-
-chart.attach(d3.select(".chart"))
-		.attr("class", "chart");
-
-var matrixData = [[1, 0], [0, 1]];
+var chart = new Chart({
+	elem: d3.select(".chart"),
+	width: 320,
+	height: 240,
+	xlim: [-6, 6],
+	ylim: [-4.5, 4.5]
+});
 
 var matrix = d3.select(".matrix");
 
-function update() {
-	matrixData = math.reshape(matrix.selectAll("input").data(), [2, 2]);
+function update(matrixData) {
+	matrixData = math.reshape(matrixData, [2, 2]);
 	var transformedData = data.map((d, i) => {
 		var d2 = Object.assign({}, d);
 		d2.vector = numeric.dot(d.vector, numeric.transpose(matrixData));
 		return d2;
 	});
 
-	var vectors = chart.chart.selectAll(".vector")
-			.data(transformedData);
+	chart.setData(transformedData).draw();
+}
 
-	vectors.exit().remove();
+function updateReset() {
+	update(matrix.selectAll("input").data());
+}
 
-	vectors.enter().append("circle")
-			.attr("class", "vector")
-			.attr("fill", d => `rgb(${d.color[0]},${d.color[1]},${d.color[2]})`)
-			.attr("cx", d => chart.xscale(d.vector[0]))
-			.attr("cy", d => chart.yscale(d.vector[1]))
-			.attr("r", "3px");
-
-	vectors.transition()
-			.attr("cx", d => chart.xscale(d.vector[0]))
-			.attr("cy", d => chart.yscale(d.vector[1]));
-	
+function updateSVD(matrixData) {
+	matrixData = math.reshape(matrixData, [2, 2]);
 	var svd = numeric.svd(matrixData);
-	U.update(svd.U);
+	U.update(numeric.neg(svd.U));
 	S.update(numeric.diag(svd.S));
-	V.update(numeric.transpose(svd.V));
+	V.update(numeric.neg(numeric.transpose(svd.V)));
 }
 
 var tr = matrix.selectAll("tr")
-		.data(matrixData)
+		.data([[1, 0], [0, 1]])
 	.enter().append("tr");
 
 var td = tr.selectAll("td")
@@ -80,7 +74,11 @@ var td = tr.selectAll("td")
 		.append("input")
 		.attr("type", "text")
 		.attr("value", d => d)
-		.on("input", function () { d3.select(this).datum(Number.isNaN(+this.value) ? 0 : +this.value); update(); });
+		.on("input", function () {
+			d3.select(this).datum(Number.isNaN(+this.value) ? 0 : +this.value);
+			update(matrix.selectAll("input").data());
+			updateSVD(matrix.selectAll("input").data());
+		});
 
 var U = new Matrix()
 		.attach(d3.select("#target"));
@@ -102,10 +100,24 @@ d3.select("#target").append("span")
 var V = new Matrix()
 		.attach(d3.select("#target"));
 
-V.table.on("mouseenter", function () { console.log(V.data); });
-V.table.on("mouseleave", function () { console.log("out"); });
+d3.select("#target").append("span")
+		.attr("class", "operator")
+		.text("•");
 
-update();
+var E = new Matrix()
+		.attach(d3.select("#target"))
+		.update([[1, 0], [0, 1]]);
+
+E.table.on("mouseenter", function () { update(E.data); });
+V.table.on("mouseenter", function () { update(V.data); });
+S.table.on("mouseenter", function () { update(numeric.dot(S.data, V.data)); });
+
+E.table.on("mouseleave", updateReset);
+V.table.on("mouseleave", updateReset);
+S.table.on("mouseleave", updateReset);
+
+update(matrix.selectAll("input").data());
+updateSVD(matrix.selectAll("input").data());
 
 
 
