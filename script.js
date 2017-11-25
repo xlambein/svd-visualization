@@ -39,7 +39,7 @@ var chart = new Chart({
 	ylim: [-4.5, 4.5]
 });
 
-var matrix = d3.select(".matrix");
+var matrix = d3.select(".matrix").append("table");
 
 function update(matrixData) {
 	matrixData = math.reshape(matrixData, [2, 2]);
@@ -82,6 +82,9 @@ var td = tr.selectAll("td")
 
 var U = new Matrix()
 		.attach(d3.select("#target"));
+U.div.append("div")
+		.attr("class", "bottom-note")
+		.html("\\(U\\)<br>Isomorphy");
 
 d3.select(".bracket")
 		.style("font-size", matrix.style("height"));
@@ -92,6 +95,9 @@ d3.select("#target").append("span")
 
 var S = new Matrix()
 		.attach(d3.select("#target"))
+S.div.append("div")
+		.attr("class", "bottom-note")
+		.html("\\(\\Sigma\\)<br>Scaling");
 
 d3.select("#target").append("span")
 		.attr("class", "operator")
@@ -99,6 +105,9 @@ d3.select("#target").append("span")
 
 var V = new Matrix()
 		.attach(d3.select("#target"));
+V.div.append("div")
+		.attr("class", "bottom-note")
+		.html("\\(V\\)<br>Isomorphy");
 
 d3.select("#target").append("span")
 		.attr("class", "operator")

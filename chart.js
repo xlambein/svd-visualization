@@ -67,8 +67,9 @@ export class Matrix {
 	}
 
 	attach (selection) {
-		this.table = selection.append("table")
+		this.div = selection.append("div")
 				.attr("class", "matrix");
+		this.table = this.div.append("table");
 
 		return this;
 	}
