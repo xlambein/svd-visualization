@@ -1,6 +1,6 @@
 import {Chart, Matrix} from "./chart.js";
 
-var data = [
+var vectors = [
 	{vector: [1, 1]},
 	{vector: [1, .5]},
 	{vector: [1, 0]},
@@ -27,8 +27,8 @@ function colorGradient2D(x, y) {
 	];
 }
 
-for (let i = 0; i < data.length; i++) {
-	data[i].color = colorGradient2D(...data[i].vector);
+for (let i = 0; i < vectors.length; i++) {
+	vectors[i].color = colorGradient2D(...vectors[i].vector);
 }
 
 var chart = new Chart({
@@ -39,13 +39,10 @@ var chart = new Chart({
 	ylim: [-4.5, 4.5]
 });
 
-var matrix = d3.select(".matrix").append("table");
-
-function update(matrixData) {
-	matrixData = math.reshape(matrixData, [2, 2]);
-	var transformedData = data.map((d, i) => {
+function update(data) {
+	var transformedData = vectors.map((d, i) => {
 		var d2 = Object.assign({}, d);
-		d2.vector = numeric.dot(d.vector, numeric.transpose(matrixData));
+		d2.vector = numeric.dot(d.vector, numeric.transpose(data));
 		return d2;
 	});
 
@@ -53,48 +50,48 @@ function update(matrixData) {
 }
 
 function updateReset() {
-	update(matrix.selectAll("input").data());
+	update(mat.data);
 }
 
-function updateSVD(matrixData) {
-	matrixData = math.reshape(matrixData, [2, 2]);
-	var svd = numeric.svd(matrixData);
-	U.update(numeric.neg(svd.U));
-	S.update(numeric.diag(svd.S));
-	V.update(numeric.neg(numeric.transpose(svd.V)));
+function updateSVD(data) {
+	var svd = numeric.svd(data);
+	U.setData(numeric.neg(svd.U)).draw();
+	S.setData(numeric.diag(svd.S)).draw();
+	V.setData(numeric.neg(numeric.transpose(svd.V))).draw();
 }
 
-var tr = matrix.selectAll("tr")
-		.data([[1, 0], [0, 1]])
-	.enter().append("tr");
+var mat = new Matrix({
+	elem: d3.select("#target"),
+	editable: true
+});
+mat.addEventListener("input", function() {
+	update(mat.data);
+	updateSVD(mat.data);
+});
+mat.setData([[1, 0], [0, 1]]).draw();
 
-var td = tr.selectAll("td")
-		.data(d => d)
-	.enter().append("td")
-		.append("input")
-		.attr("type", "text")
-		.attr("value", d => d)
-		.on("input", function () {
-			d3.select(this).datum(Number.isNaN(+this.value) ? 0 : +this.value);
-			update(matrix.selectAll("input").data());
-			updateSVD(matrix.selectAll("input").data());
-		});
+mat.div.append("div")
+		.attr("class", "bottom-note")
+		.html("\\(M\\)<br>Arbitrary Matrix");
 
-var U = new Matrix()
-		.attach(d3.select("#target"));
+d3.select("#target").append("span")
+		.attr("class", "operator")
+		.text("=");
+
+var U = new Matrix({
+	elem: d3.select("#target")
+});
 U.div.append("div")
 		.attr("class", "bottom-note")
 		.html("\\(U\\)<br>Isomorphy");
-
-d3.select(".bracket")
-		.style("font-size", matrix.style("height"));
 
 d3.select("#target").append("span")
 		.attr("class", "operator")
 		.text("•");
 
-var S = new Matrix()
-		.attach(d3.select("#target"))
+var S = new Matrix({
+	elem: d3.select("#target")
+});
 S.div.append("div")
 		.attr("class", "bottom-note")
 		.html("\\(\\Sigma\\)<br>Scaling");
@@ -103,8 +100,9 @@ d3.select("#target").append("span")
 		.attr("class", "operator")
 		.text("•");
 
-var V = new Matrix()
-		.attach(d3.select("#target"));
+var V = new Matrix({
+	elem: d3.select("#target")
+});
 V.div.append("div")
 		.attr("class", "bottom-note")
 		.html("\\(V\\)<br>Isomorphy");
@@ -113,20 +111,24 @@ d3.select("#target").append("span")
 		.attr("class", "operator")
 		.text("•");
 
-var E = new Matrix()
-		.attach(d3.select("#target"))
-		.update([[1, 0], [0, 1]]);
+var E = new Matrix({
+	elem: d3.select("#target")
+}).setData([[1, 0], [0, 1]]).draw();
 
-E.table.on("mouseenter", function () { update(E.data); });
-V.table.on("mouseenter", function () { update(V.data); });
-S.table.on("mouseenter", function () { update(numeric.dot(S.data, V.data)); });
+E.div.on("mouseenter", function () { update(E.data); });
+V.div.on("mouseenter", function () { update(V.data); });
+S.div.on("mouseenter", function () { update(numeric.dot(S.data, V.data)); });
+U.div.on("mouseenter", function () { update(mat.data); });
+mat.div.on("mouseenter", function () { update(mat.data); });
 
-E.table.on("mouseleave", updateReset);
-V.table.on("mouseleave", updateReset);
-S.table.on("mouseleave", updateReset);
+E.div.on("mouseleave", updateReset);
+V.div.on("mouseleave", updateReset);
+S.div.on("mouseleave", updateReset);
+U.div.on("mouseleave", updateReset);
+mat.div.on("mouseleave", updateReset);
 
-update(matrix.selectAll("input").data());
-updateSVD(matrix.selectAll("input").data());
+update(mat.data);
+updateSVD(mat.data);
 
 
 

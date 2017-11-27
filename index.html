@@ -25,6 +25,10 @@
 	margin: 0 8px;
 }
 
+.matrix:hover {
+	background-color: #cdf;
+}
+
 .matrix:before, .matrix:after {
 	content: "";
 	width: 10px;
@@ -91,17 +95,12 @@
 			<div class="chart"></div>
 		</div>
 		<div style="text-align: center" id="target">
-			<div class="matrix">
-				<div class="bottom-note">\(M\)<br>Arbitrary Matrix</div>	
-			</div>
-			<span class="operator">=</span>
 		</div>
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.16.5/math.min.js"></script>
 		<script src="http://www.numericjs.com/lib/numeric-1.2.6.min.js"></script>
 		<script src="lib/d3.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-		<!-- <script src="https://cdn.jsdelivr.net/npm/pubsubJS@1.0.0/pubsub.min.js"></script> -->
 		<script src="./script.js" type="module"></script>
 	</body>
 </html>

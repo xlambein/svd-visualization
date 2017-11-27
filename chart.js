@@ -1,4 +1,20 @@
 
+// The following class comes from
+// https://stackoverflow.com/a/24216547
+class Emitter {
+	constructor() {
+		var delegate = document.createDocumentFragment();
+		[
+			'addEventListener',
+			'dispatchEvent',
+			'removeEventListener'
+		].forEach(f =>
+			this[f] = (...xs) => delegate[f](...xs)
+		)
+	}
+}
+
+
 export class Chart {
 	constructor (opts) {
 		this.margin = opts.margin || {top: 10, right: 10, bottom: 10, left: 10};
@@ -62,22 +78,19 @@ export class Chart {
 	}
 }
 
-export class Matrix {
-	constructor() {
-	}
-
-	attach (selection) {
-		this.div = selection.append("div")
+export class Matrix extends Emitter {
+	constructor (opts) {
+		super();
+		this.div = opts.elem.append("div")
 				.attr("class", "matrix");
 		this.table = this.div.append("table");
+		this.editable = opts.editable || false;
 
-		return this;
+		this.inputEvent = new Event("input");
 	}
 
-	update (data) {
-		this.data = data;
-
-		this.table.data([data]);
+	draw () {
+		this.table.data([this.data]);
 
 		var tr = this.table.selectAll("tr")
 				.data(this.data);
@@ -92,10 +105,38 @@ export class Matrix {
 
 		td.exit().remove();
 
-		td = td.enter().append("td")
-			.merge(td)
-				.text(d => d.toFixed(2));
+		if (this.editable) {
+			td = td.enter().append("td")
+				.merge(td);
+
+			var input = td.selectAll("input")
+					.data(d => [d]);
+
+			input.exit().remove();
+
+			var matrix = this;
+			input = input.enter().append("input")
+					.attr("type", "text")
+					.on("input", function () {
+						d3.select(this).datum(Number.isNaN(+this.value) ? 0 : +this.value);
+						matrix.setData(math.reshape(input.data(), math.size(matrix.data)))
+								.draw();
+						matrix.dispatchEvent(matrix.inputEvent);
+					})
+				.merge(input)
+					.attr("value", d => d.toFixed(2));
+		} else {
+			td = td.enter().append("td")
+				.merge(td)
+					.text(d => d.toFixed(2));
+		}
 
 		return this;
 	}
+
+	setData(data) {
+		this.data = data;
+		return this;
+	}
 }
+
