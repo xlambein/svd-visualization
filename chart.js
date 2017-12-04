@@ -81,7 +81,7 @@ export class Chart {
 export class Matrix extends Emitter {
 	constructor (opts) {
 		super();
-		this.div = opts.elem.append("div")
+		this.div = opts.elem
 				.attr("class", "matrix");
 		this.table = this.div.append("table");
 		this.editable = opts.editable || false;

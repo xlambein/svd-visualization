@@ -26,7 +26,7 @@
 }
 
 .matrix:hover {
-	background-color: #cdf;
+	background-color: #eef;
 }
 
 .matrix:before, .matrix:after {
@@ -95,6 +95,23 @@
 			<div class="chart"></div>
 		</div>
 		<div style="text-align: center" id="target">
+			<div id="M"><div class="bottom-note">\(M\)<br>Arbitrary Matrix</div></div>
+			<div class="matrix matrix-vector">
+				<table>
+					<tr><td>\(x\)</td></tr>
+					<tr><td>\(y\)</td></tr>
+				</table>
+			</div>
+			<span class="operator">=</span>
+			<div id="U"><div class="bottom-note">\(U\)<br>Isometry</div></div>
+			<div id="S"><div class="bottom-note">\(\Sigma\)<br>Scaling</div></div>
+			<div id="V"><div class="bottom-note">\(V^T\)<br>Isometry</div></div>
+			<div class="matrix matrix-vector">
+				<table>
+					<tr><td>\(x\)</td></tr>
+					<tr><td>\(y\)</td></tr>
+				</table>
+			</div>
 		</div>
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.16.5/math.min.js"></script>

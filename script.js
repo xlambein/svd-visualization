@@ -61,7 +61,7 @@ function updateSVD(data) {
 }
 
 var mat = new Matrix({
-	elem: d3.select("#target"),
+	elem: d3.select("#M"),
 	editable: true
 });
 mat.addEventListener("input", function() {
@@ -70,58 +70,27 @@ mat.addEventListener("input", function() {
 });
 mat.setData([[1, 0], [0, 1]]).draw();
 
-mat.div.append("div")
-		.attr("class", "bottom-note")
-		.html("\\(M\\)<br>Arbitrary Matrix");
-
-d3.select("#target").append("span")
-		.attr("class", "operator")
-		.text("=");
-
 var U = new Matrix({
-	elem: d3.select("#target")
+	elem: d3.select("#U")
 });
-U.div.append("div")
-		.attr("class", "bottom-note")
-		.html("\\(U\\)<br>Isomorphy");
-
-d3.select("#target").append("span")
-		.attr("class", "operator")
-		.text("•");
 
 var S = new Matrix({
-	elem: d3.select("#target")
+	elem: d3.select("#S")
 });
-S.div.append("div")
-		.attr("class", "bottom-note")
-		.html("\\(\\Sigma\\)<br>Scaling");
-
-d3.select("#target").append("span")
-		.attr("class", "operator")
-		.text("•");
 
 var V = new Matrix({
-	elem: d3.select("#target")
+	elem: d3.select("#V")
 });
-V.div.append("div")
-		.attr("class", "bottom-note")
-		.html("\\(V\\)<br>Isomorphy");
 
-d3.select("#target").append("span")
-		.attr("class", "operator")
-		.text("•");
+var E = d3.selectAll(".matrix-vector");
 
-var E = new Matrix({
-	elem: d3.select("#target")
-}).setData([[1, 0], [0, 1]]).draw();
-
-E.div.on("mouseenter", function () { update(E.data); });
+E.on("mouseenter", function () { update([[1, 0], [0, 1]]); });
 V.div.on("mouseenter", function () { update(V.data); });
 S.div.on("mouseenter", function () { update(numeric.dot(S.data, V.data)); });
 U.div.on("mouseenter", function () { update(mat.data); });
 mat.div.on("mouseenter", function () { update(mat.data); });
 
-E.div.on("mouseleave", updateReset);
+E.on("mouseleave", updateReset);
 V.div.on("mouseleave", updateReset);
 S.div.on("mouseleave", updateReset);
 U.div.on("mouseleave", updateReset);
