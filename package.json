@@ -2,11 +2,15 @@
   "name": "svd-visualization",
   "version": "0.1.0",
   "scripts": {
-    "build": "babel src -d build"
+    "build": "babel src -d build",
+    "serve": "http-server"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.2",
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3"
+  },
+  "dependencies": {
+    "http-server": "^0.11.1"
   }
 }
