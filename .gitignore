@@ -1,1 +1,8 @@
+# Vim
 *.swp
+
+# Node.js
+node_modules
+
+# Build
+build

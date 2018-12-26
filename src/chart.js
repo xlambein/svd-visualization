@@ -1,3 +1,4 @@
+import {makeScrubbable} from "./scrub.js";
 
 // The following class comes from
 // https://stackoverflow.com/a/24216547
@@ -65,9 +66,11 @@ export class Chart {
 				.attr("fill", d => `rgb(${d.color[0]},${d.color[1]},${d.color[2]})`)
 				.attr("cx", d => this.xscale(d.vector[0]))
 				.attr("cy", d => this.yscale(d.vector[1]))
-				.attr("r", "3px");
+				.attr("r", "4px");
 
 		vectors.transition()
+				.ease(d3.easeLinear)
+				.duration(200)
 				.attr("cx", d => this.xscale(d.vector[0]))
 				.attr("cy", d => this.yscale(d.vector[1]));
 	}
@@ -116,15 +119,26 @@ export class Matrix extends Emitter {
 
 			var matrix = this;
 			input = input.enter().append("input")
-					.attr("type", "text")
+				//	.attr("type", "number")
+				//	.attr("step", "0.1")
+				//	.attr("min", "-5")
+				//	.attr("max", "5")
 					.on("input", function () {
-						d3.select(this).datum(Number.isNaN(+this.value) ? 0 : +this.value);
+						var val = parseFloat(this.value);
+						d3.select(this).datum(Number.isNaN(val) ? 0 : val);
 						matrix.setData(math.reshape(input.data(), math.size(matrix.data)))
 								.draw();
 						matrix.dispatchEvent(matrix.inputEvent);
 					})
+					.on("scrub", function () {
+						this.value = d3.event.detail.toFixed(2);
+						d3.select(this).dispatch('input');
+					})
+					.each(function () {
+						makeScrubbable(this);
+					})
 				.merge(input)
-					.attr("value", d => d.toFixed(2));
+					.property("value", d => d.toFixed(2));
 		} else {
 			td = td.enter().append("td")
 				.merge(td)

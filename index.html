@@ -50,7 +50,7 @@
 
 .matrix input {
 	border: 1px solid #ccc;
-	width: 36px;
+	width: 72px;
 	height: 36px;
 	padding: 0;
 	margin: 1px 1px 1px 1px;
@@ -83,6 +83,18 @@
 	color: #666;
 }
 
+#target {
+	margin-bottom: 60px;
+}
+
+a[data-matrix] {
+	cursor: pointer;
+	color: darkblue;
+}
+
+a[data-matrix]:hover {
+	text-decoration: underline;
+}
 		</style>
 
 		<!--[if lt IE 9]>
@@ -91,7 +103,7 @@
 	</head>
 
 	<body>
-		<div style="width: 322px; margin: auto">
+		<div style="width: 602px; margin: auto">
 			<div class="chart"></div>
 		</div>
 		<div style="text-align: center" id="target">
@@ -114,11 +126,29 @@
 			</div>
 		</div>
 
+		<div style="width: 602px; margin: auto;">
+			<h3>Set the matrix to:</h3>
+			<ul>
+				<li><a data-matrix="[[1, 0], [0, 1]]">Identity</a></li>
+				<li><a data-matrix="[[0.71, -0.71], [0.71, 0.71]]">45&deg; Rotation</a></li>
+				<li><a data-matrix="[[0, -1], [1, 0]]">90&deg; Rotation</a></li>
+				<li><a data-matrix="[[-1, 0], [0, -1]]">180&deg; Rotation</a></li>
+				<li><a data-matrix="[[-1, 0], [0, 1]]">Vertical Symmetry</a></li>
+				<li><a data-matrix="[[1, 0], [0, -1]]">Horizontal Symmetry</a></li>
+				<li><a data-matrix="[[0, 0], [0, 1]]">Collapse to Vertical Line</a></li>
+				<li><a data-matrix="[[1, 0], [0, 0]]">Collapse to Horizontal Line</a></li>
+			</ul>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.20.19/system.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.16.5/math.min.js"></script>
-		<script src="http://www.numericjs.com/lib/numeric-1.2.6.min.js"></script>
-		<script src="lib/d3.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-		<script src="./script.js" type="module"></script>
+
+		<script>
+			System.import("build/script.js");
+		</script>
 	</body>
 </html>
 

@@ -33,8 +33,8 @@ for (let i = 0; i < vectors.length; i++) {
 
 var chart = new Chart({
 	elem: d3.select(".chart"),
-	width: 320,
-	height: 240,
+	width: 600,
+	height: 450,
 	xlim: [-6, 6],
 	ylim: [-4.5, 4.5]
 });
@@ -55,9 +55,13 @@ function updateReset() {
 
 function updateSVD(data) {
 	var svd = numeric.svd(data);
-	U.setData(numeric.neg(svd.U)).draw();
+	if (numeric.sum(numeric.lt(svd.U, 0)) + numeric.sum(numeric.lt(svd.V, 0)) > numeric.sum(numeric.gt(svd.U, 0)) + numeric.sum(numeric.gt(svd.V, 0))) {
+		svd.U = numeric.neg(svd.U);
+		svd.V = numeric.neg(svd.V);
+	}
+	U.setData(svd.U).draw();
 	S.setData(numeric.diag(svd.S)).draw();
-	V.setData(numeric.neg(numeric.transpose(svd.V))).draw();
+	V.setData(numeric.transpose(svd.V)).draw();
 }
 
 var mat = new Matrix({
@@ -98,4 +102,16 @@ mat.div.on("mouseleave", updateReset);
 
 update(mat.data);
 updateSVD(mat.data);
+
+export function setMatrix(data) {
+	mat.setData(data).draw();
+	update(mat.data);
+	updateSVD(mat.data);
+}
+
+var presets = d3.selectAll("a[data-matrix]")
+		.on("click", function () {
+			var matrix = JSON.parse(this.dataset.matrix);
+			setMatrix(matrix);
+		});
 
